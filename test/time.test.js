@@ -42,8 +42,26 @@ test('GET /time responds 200 with JSON body', async () => {
   assert.equal(new Date(body.iso).getTime(), body.epochMs);
 });
 
-test('unknown routes still return 404', async () => {
+test('unknown routes return 404 with plain text body', async () => {
   const res = await fetch(`${baseUrl()}/nope`);
 
   assert.equal(res.status, 404);
+  assert.match(res.headers.get('content-type') ?? '', /text\/plain/);
+  assert.equal(await res.text(), 'Not Found');
+});
+
+test('non-GET requests to /time return 404', async () => {
+  for (const method of ['POST', 'PUT', 'DELETE']) {
+    const res = await fetch(`${baseUrl()}/time`, { method });
+
+    assert.equal(res.status, 404, `${method} /time should be 404`);
+  }
+});
+
+test('GET /time serves successive requests with non-decreasing time', async () => {
+  const first = await (await fetch(`${baseUrl()}/time`)).json();
+  const second = await (await fetch(`${baseUrl()}/time`)).json();
+
+  assert.ok(second.epochMs >= first.epochMs);
+  assert.ok(second.iso >= first.iso);
 });
