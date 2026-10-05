@@ -1,0 +1,44 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required to upload SARIF results to GitHub code scanning,
+      # which surfaces lint findings inline in pull requests.
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint (SARIF)
+        run: |
+          npx eslint . \
+            --format @microsoft/eslint-formatter-sarif \
+            --output-file eslint-results.sarif
+        continue-on-error: true
+
+      - name: Upload SARIF to GitHub code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+
+      - name: Run ESLint (check)
+        run: npx eslint .
