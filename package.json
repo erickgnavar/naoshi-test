@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test test/ping.test.js test/time.test.js",
-    "test:coverage": "node --test --experimental-test-coverage test/ping.test.js test/time.test.js"
+    "test": "node --test test/ping.test.js test/time.test.js test/todos.test.js",
+    "test:coverage": "node --test --experimental-test-coverage test/ping.test.js test/time.test.js test/todos.test.js"
   },
   "private": true
 }
